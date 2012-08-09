@@ -6,18 +6,12 @@ class CopywritingPhrase < ActiveRecord::Base
 
   attr_accessible :locale, :name, :default, :value, :scope, :page_id, :phrase_type
 
-  if defined?(::CopywritingPhrase::Translation)
-    ::CopywritingPhrase::Translation.module_eval do
-      attr_accessible :locale
-    end
-  end
-  
   def self.for(name, options = {})
     options = {:phrase_type => 'text', :scope => 'default'}.merge(options)
     name = name.to_s
     page_id = (options[:page].try(:id) || options[:page_id] || nil)
 
-    if (phrase = self.where(:name => name, :page_id => page_id).first).nil?
+    if (phrase = self.where(:name => name, :scope => options[:scope], :page_id => page_id).first).nil?
       phrase = self.create(:name => name,
                            :scope => options[:scope],
                            :value => options[:value],
